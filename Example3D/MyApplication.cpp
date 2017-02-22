@@ -82,7 +82,7 @@ bool MyApplication::startup()
 	
 	// testModel.Load("../Example3D/Models/Iron_Man.obj", "../Example3D/Models/Iron_Man.tga");
 	
-	return testModel.Load("../Example3D/Models/halo.fbx");
+	return testModel.Load("../Example3D/Models/Pyro/pyro.fbx", "../Example3D/Models/Pyro/Pyro_D.tga");
 }
 
 void MyApplication::shutdown()
@@ -143,7 +143,7 @@ void MyApplication::draw()
 
 	static float angle = 0;
 	angle += 0.01f;
-	m_modelMatrix = glm::rotate(angle, glm::vec3(0, 1, 0));
+	m_modelMatrix = glm::rotate(angle, glm::vec3(0, 1, 0)) *glm::scale(glm::vec3(0.003f));
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 

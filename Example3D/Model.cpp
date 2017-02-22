@@ -30,7 +30,7 @@ bool Model::Load(const char * filename)
 	if (strstr(filename, ".fbx") != NULL)
 	{
 		m_fbx = new FBXFile(); 
-		m_fbx->load(filename, FBXFile::UNITS_METER, false, false); 
+		m_fbx->load(filename, FBXFile::UNIT_SCALE::UNITS_METER, true, false); 
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
 		return true;
@@ -41,18 +41,35 @@ bool Model::Load(const char * filename)
 
 bool Model::Load(const char * modelFile, const char * textureFile)
 {
-	tinyobj::attrib_t attribs;
-	std::vector<tinyobj::shape_t> shapes;
-	std::vector<tinyobj::material_t> materials;
-	std::string err;
+	if (strstr(modelFile, ".obj") != NULL)
+	{
+		tinyobj::attrib_t attribs;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string err;
 
-	bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
+		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
 
-	m_texture = Texture::LoadTexture(textureFile);
+		m_texture = Texture::LoadTexture(textureFile);
 
-	createOpenGLBuffers(attribs, shapes);
+		createOpenGLBuffers(attribs, shapes);
 
-	return success;
+		return success;
+	}
+
+	if (strstr(modelFile, ".fbx") != NULL)
+	{
+		m_fbx = new FBXFile();
+		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, false);
+		m_texture = Texture::LoadTexture(textureFile);
+		createOpenGLBuffers(m_fbx);
+		isFBX = true;
+
+
+		return true;
+	}
+
+	return false;
 }
 
 void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID)
@@ -63,7 +80,7 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 	glUniformMatrix4fv(projectionViewUniform, 1, GL_FALSE, (float*)&mvp);
 
 	unsigned int modelUniform = glGetUniformLocation(programID, "m");
-	glUniformMatrix4fv(modelUniform, 1, GL_FALSE, (float*)&transform);
+	glUniformMatrix4fv(modelUniform, 1, GL_FALSE, (float*) &transform);
 
 	if (m_texture != NULL)
 	{	
@@ -87,7 +104,6 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 	if (isFBX)
 	{
 		//for(auto& gl: m_fbx->)
-
 		for (unsigned int i = 0; i < m_fbx->getMeshCount(); ++i)
 		{
 			FBXMeshNode* mesh = m_fbx->getMeshByIndex(i);
@@ -227,6 +243,11 @@ void Model::createOpenGLBuffers(FBXFile * fbx)
 									  // FBXvertex::normaloffset defined in fbxfile.h
 									  // ((char*)0) tells it to start at 0 and increment 1 byte for each value
 		glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::NormalOffset);
+			
+		glEnableVertexAttribArray(2); //texture data 
+										// void* 24 is the number of bytes into data to read ie skipping 2 * 3 sets of floats (4) = 24
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
+		
 
 		glBindVertexArray(0); glBindBuffer(GL_ARRAY_BUFFER, 0); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
