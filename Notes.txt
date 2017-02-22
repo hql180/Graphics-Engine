@@ -1,0 +1,15 @@
+c++
+loads from c++ code from file to cpu
+then loads onto graphics card via gl code
+
+vertext shader
+grabs data from gpu
+grabs any uniforms from gl code
+output any out varibles to next step
+
+fragment shader
+in data from previous steps
+loads uniforms
+out to next step
+
+written to screen via rasterisation
