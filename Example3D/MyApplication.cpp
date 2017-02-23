@@ -41,6 +41,8 @@ bool MyApplication::startup()
 
 	m_programID = Shader::CompileShaders(vsSource, fsSource);
 
+	m_animProgramID = Shader::CompileShaders("../Example3D/Shaders/animatedVertexShader.vert", fsSource);
+
 	//// shader
 
 	//int success = GL_FALSE;
@@ -93,6 +95,8 @@ void MyApplication::shutdown()
 void MyApplication::update(float dt)
 {
 	m_time = getTime();
+
+	testModel.Update(m_time);
 
 	camera.Update();
 
@@ -152,7 +156,9 @@ void MyApplication::draw()
 	float lightIntensity = 0.5f;
 	specPow = 500;
 
-	glUseProgram(m_programID); 
+	unsigned int& usingID = testModel.isAnimated() ? m_animProgramID : m_programID;
+
+	glUseProgram(usingID); 
 	// get a ticket for the address of a named uniform in shader code
 
 	/// Handled in new draw class ///
@@ -162,24 +168,26 @@ void MyApplication::draw()
 	//glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(mvp)); 
 
 
-	unsigned int lightDirectionUniform = glGetUniformLocation(m_programID, "lightDirection");
+	unsigned int lightDirectionUniform = glGetUniformLocation(usingID, "lightDirection");
 	//glUniform4d(lightDirectionUniform,
 	glUniform3f(lightDirectionUniform, lightDirection.x, lightDirection.y, lightDirection.z);
 
-	unsigned int lightColourUniform = glGetUniformLocation(m_programID, "lightColour");
+	unsigned int lightColourUniform = glGetUniformLocation(usingID, "lightColour");
 	glUniform3f(lightColourUniform, lightColour.x, lightColour.y, lightColour.z);
 
-	unsigned int cameraUniform = glGetUniformLocation(m_programID, "cameraPos");
+	unsigned int cameraUniform = glGetUniformLocation(usingID, "cameraPos");
 	glUniform3f(cameraUniform, camera.position.x, camera.position.y, camera.position.z);
 
-	unsigned int specPowUniform = glGetUniformLocation(m_programID, "specPow");
+	unsigned int specPowUniform = glGetUniformLocation(usingID, "specPow");
 	glUniform1f(specPowUniform, specPow);
 
-	unsigned int lightIntensityUniform = glGetUniformLocation(m_programID, "lightIntensity");
+	unsigned int lightIntensityUniform = glGetUniformLocation(usingID, "lightIntensity");
 	glUniform1f(lightIntensityUniform, lightIntensity);
 	
-	// set texture slot
-	testModel.Draw(m_modelMatrix, m_projectionMatrix * m_viewMatrix, m_programID);
+	testModel.Draw(m_modelMatrix, m_projectionMatrix * m_viewMatrix, usingID);
+	
+
+
 	
 	//static float x = -5;
 	//x += 0.1f;

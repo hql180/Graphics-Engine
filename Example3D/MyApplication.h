@@ -51,6 +51,8 @@ private:
 
 	unsigned int m_programID;
 
+	unsigned int m_animProgramID;
+
 	glm::vec3 lightDirection;
 	glm::vec3 lightColour;
 

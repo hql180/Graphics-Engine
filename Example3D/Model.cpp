@@ -30,7 +30,7 @@ bool Model::Load(const char * filename)
 	if (strstr(filename, ".fbx") != NULL)
 	{
 		m_fbx = new FBXFile(); 
-		m_fbx->load(filename, FBXFile::UNIT_SCALE::UNITS_METER, true, false); 
+		m_fbx->load(filename, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true); 
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
 		return true;
@@ -60,7 +60,7 @@ bool Model::Load(const char * modelFile, const char * textureFile)
 	if (strstr(modelFile, ".fbx") != NULL)
 	{
 		m_fbx = new FBXFile();
-		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, false);
+		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
 		m_texture = Texture::LoadTexture(textureFile);
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
@@ -103,6 +103,15 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 
 	if (isFBX)
 	{
+		if (isAnimated())
+		{
+			FBXSkeleton* skeleton = m_fbx->getSkeletonByIndex(0);
+
+			skeleton->updateBones();
+
+			unsigned int bones_location = glGetUniformLocation(programID, "bones");
+			glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
+		}
 		//for(auto& gl: m_fbx->)
 		for (unsigned int i = 0; i < m_fbx->getMeshCount(); ++i)
 		{
@@ -125,7 +134,7 @@ void Model::createOpenGLBuffers(tinyobj::attrib_t & attribs, std::vector<tinyobj
 		// setup OpenGl data
 		// Generates array and buffers @ memory location glinfo[shapeIndex].etc
 		glGenVertexArrays(1, &m_glInfo[shapeIndex].m_VAO);
-		glGenBuffers(1, &m_glInfo[shapeIndex].m_VBO);
+		glGenBuffers(1, &m_glInfo[shapeIndex].m_VBO1);
 
 		// binds current vertex array to voa created above
 		glBindVertexArray(m_glInfo[shapeIndex].m_VAO);
@@ -177,7 +186,7 @@ void Model::createOpenGLBuffers(tinyobj::attrib_t & attribs, std::vector<tinyobj
 
 
 		// bind vertex buffer created along with current vao
-		glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[shapeIndex].m_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_glInfo[shapeIndex].m_VBO1);
 		// binds all the data stored in vertices vector to be used as the source for GL drawing commands
 		// second value being size in bytes of data
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(OBJVertex), vertices.data(), GL_STATIC_DRAW);
@@ -248,9 +257,23 @@ void Model::createOpenGLBuffers(FBXFile * fbx)
 										// void* 24 is the number of bytes into data to read ie skipping 2 * 3 sets of floats (4) = 24
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TexCoord1Offset);
 		
+		if (isAnimated())
+		{
+			glEnableVertexAttribArray(3); // tangents
 
-		glBindVertexArray(0); glBindBuffer(GL_ARRAY_BUFFER, 0); glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			glVertexAttribPointer(3, 4, GL_FLOAT, GL_TRUE, sizeof(FBXVertex), ((char*)0) + FBXVertex::TangentOffset);
 
+			glEnableVertexAttribArray(4); // weights
+			glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::WeightsOffset);
+
+			glEnableVertexAttribArray(5); // indices
+			glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(FBXVertex), ((char*)0) + FBXVertex::IndicesOffset);
+		}
+
+		glBindVertexArray(0); 
+		glBindBuffer(GL_ARRAY_BUFFER, 0); 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+				
 		mesh->m_userData = glData;
 	}
 }
@@ -270,4 +293,25 @@ void Model::cleanupOpenGLBuffers(FBXFile * fbx)
 
 		delete[] glData;
 	}
+}
+
+void Model::Update(float dt)
+{
+	if (isAnimated())
+	{
+		FBXSkeleton* skeleton = m_fbx->getSkeletonByIndex(0);
+		FBXAnimation* animation = m_fbx->getAnimationByIndex(0);
+
+		skeleton->evaluate(animation, dt);
+
+		for (unsigned int bone_index = 0; bone_index < skeleton->m_boneCount; ++bone_index)
+		{
+			skeleton->m_nodes[bone_index]->updateGlobalTransform();
+		}
+	}
+}
+
+bool Model::isAnimated()
+{
+	return m_fbx && m_fbx->getSkeletonCount() > 0;
 }

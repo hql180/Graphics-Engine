@@ -8,7 +8,8 @@
 struct OpenGLInfo
 {
 	unsigned int m_VAO;
-	unsigned int m_VBO;
+	unsigned int m_VBO1;
+	unsigned int m_VBO2;
 	unsigned int m_IBO;
 	unsigned int m_faceCount;
 };
@@ -39,6 +40,10 @@ public:
 
 	void cleanupOpenGLBuffers(FBXFile* fbx);
 
+	void Update(float dt);
+
+	bool isAnimated();
+
 	FBXFile* m_fbx;
 
 	unsigned int m_texture;
@@ -46,6 +51,8 @@ public:
 	std::vector<OpenGLInfo> m_glInfo;
 
 	bool isFBX;
+
+	float m_timer;
 
 	// FBX stuff
 
