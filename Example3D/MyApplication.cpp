@@ -157,9 +157,9 @@ void MyApplication::draw()
 
 	//lightDirection = vec3(0.5, 0.7, 0.5);
 	lightDirection = glm::vec3(sin(glfwGetTime()), .7, cos(glfwGetTime()));
-	lightColour = vec3(.1, .1, .1);
-	float lightIntensity = 0.5f;
-	specPow = 20000;
+	lightColour = vec3(1, 1, 1);
+	float lightIntensity = 1.0f;
+	specPow = 20;
 
 	unsigned int& usingID = testModel.isAnimated() ? m_animProgramID : m_programID;
 
