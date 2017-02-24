@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "FBXLoader\FBXFile.h"
 #include <iostream>
+#include "glfw\include\GLFW\glfw3.h"
 
 #define STB_IMAGE_IMPLEMENTATION 
 
@@ -84,7 +85,10 @@ bool MyApplication::startup()
 	
 	// testModel.Load("../Example3D/Models/Iron_Man.obj", "../Example3D/Models/Iron_Man.tga");
 	
-	return testModel.Load("../Example3D/Models/Pyro/pyro.fbx", "../Example3D/Models/Pyro/Pyro_D.tga");
+	return testModel.Load("../Example3D/Models/Pyro/pyro.fbx", 
+						"../Example3D/Models/Pyro/Pyro_D.tga", 
+						"../Example3D/Models/Pyro/Pyro_N.tga",
+						"../Example3D/Models/Pyro/Pyro_S.tga");
 }
 
 void MyApplication::shutdown()
@@ -146,15 +150,16 @@ void MyApplication::draw()
 	m_viewMatrix = camera.GetViewMatrix();
 
 	static float angle = 0;
-	angle += 0.01f;
+	//angle += 0.01f;
 	m_modelMatrix = glm::rotate(angle, glm::vec3(0, 1, 0)) *glm::scale(glm::vec3(0.003f));
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
-	lightDirection = vec3(0.5, 0.7, 0.5);
-	lightColour = vec3(1, 1, 1);
+	//lightDirection = vec3(0.5, 0.7, 0.5);
+	lightDirection = glm::vec3(sin(glfwGetTime()), .7, cos(glfwGetTime()));
+	lightColour = vec3(.1, .1, .1);
 	float lightIntensity = 0.5f;
-	specPow = 500;
+	specPow = 20000;
 
 	unsigned int& usingID = testModel.isAnimated() ? m_animProgramID : m_programID;
 

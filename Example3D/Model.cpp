@@ -72,6 +72,75 @@ bool Model::Load(const char * modelFile, const char * textureFile)
 	return false;
 }
 
+bool Model::Load(const char * modelFile, const char * textureFile, const char * normalMapFile)
+{
+	if (strstr(modelFile, ".obj") != NULL)
+	{
+		tinyobj::attrib_t attribs;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string err;
+
+		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
+
+		m_texture = Texture::LoadTexture(textureFile);
+
+		createOpenGLBuffers(attribs, shapes);
+
+		return success;
+	}
+
+	if (strstr(modelFile, ".fbx") != NULL)
+	{
+		m_fbx = new FBXFile();
+		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
+		m_texture = Texture::LoadTexture(textureFile);
+		m_normalmap = Texture::LoadTexture(normalMapFile);
+		createOpenGLBuffers(m_fbx);
+		isFBX = true;
+
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Model::Load(const char * modelFile, const char * textureFile, const char * normalMapFile, const char * specularMapFile)
+{
+	if (strstr(modelFile, ".obj") != NULL)
+	{
+		tinyobj::attrib_t attribs;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string err;
+
+		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
+
+		m_texture = Texture::LoadTexture(textureFile);
+
+		createOpenGLBuffers(attribs, shapes);
+
+		return success;
+	}
+
+	if (strstr(modelFile, ".fbx") != NULL)
+	{
+		m_fbx = new FBXFile();
+		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
+		m_texture = Texture::LoadTexture(textureFile);
+		m_normalmap = Texture::LoadTexture(normalMapFile);
+		m_specularmap = Texture::LoadTexture(specularMapFile);
+		createOpenGLBuffers(m_fbx);
+		isFBX = true;
+
+
+		return true;
+	}
+
+	return false;
+}
+
 void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID)
 {
 	mat4 mvp = cameraMatrix * transform;
@@ -89,6 +158,22 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 
 		unsigned int textureUniform = glGetUniformLocation(programID, "tex");
 		glUniform1i(textureUniform, 0);
+	}
+
+	if (m_normalmap != NULL)
+	{
+		glActiveTexture(GL_TEXTURE1); 
+		glBindTexture(GL_TEXTURE_2D, m_normalmap);
+		unsigned int normalUniform = glGetUniformLocation(programID, "normal");
+		glUniform1i(normalUniform, 1);
+	}
+
+	if (m_specularmap != NULL)
+	{
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, m_specularmap);
+		unsigned int specularUniform = glGetUniformLocation(programID, "specular");
+		glUniform1i(specularUniform, 2);
 	}
 
 	if (!isFBX)
@@ -112,6 +197,9 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int progr
 			unsigned int bones_location = glGetUniformLocation(programID, "bones");
 			glUniformMatrix4fv(bones_location, skeleton->m_boneCount, GL_FALSE, (float*)skeleton->m_bones);
 		}
+
+		
+
 		//for(auto& gl: m_fbx->)
 		for (unsigned int i = 0; i < m_fbx->getMeshCount(); ++i)
 		{

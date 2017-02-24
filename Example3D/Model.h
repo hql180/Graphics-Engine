@@ -32,6 +32,10 @@ public:
 
 	bool Load(const char* modelFile, const char* textureFile);
 
+	bool Load(const char* modelFile, const char* textureFile, const char* normalMapFile);
+
+	bool Load(const char* modelFile, const char* textureFile, const char* normalMapFile, const char* specularMapFile);
+
 	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID);
 
 	void createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>&shapes);
@@ -47,6 +51,10 @@ public:
 	FBXFile* m_fbx;
 
 	unsigned int m_texture;
+
+	unsigned int m_normalmap;
+
+	unsigned int m_specularmap;
 
 	std::vector<OpenGLInfo> m_glInfo;
 

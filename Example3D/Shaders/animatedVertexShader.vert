@@ -6,10 +6,11 @@ layout(location=3) in vec4 tangent;
 layout(location=4) in vec4 weights;
 layout(location=5) in vec4 indices;
 
-out vec4 vNormal;
 out vec4 vPosition;
 out vec4 vWorldNormal;
 out vec2 vUV;
+out vec3 vTangent; // worldspace
+out vec3 vBiTangent; // worldspace
 
 
 uniform mat4 projectionViewWorldMatrix;
@@ -27,10 +28,24 @@ void main()
 	P += bones[ index.z ] * position * weights.z;
 	P += bones[ index.w ] * position * weights.w;
 
-	vNormal = normal;
+	vec4 norm = vec4(normal.xyz, 0);
+	vec4 N = bones[ index.x ] * norm * weights.x;
+	N += bones[ index.y ] * norm * weights.y;
+	N += bones[ index.z ] * norm * weights.z;
+	N += bones[ index.w ] * norm * weights.w;
+
+	vec4 tang = vec4(tangent.xyz, 0);
+	vec4 T = bones[ index.x ] * tang * weights.x;
+	T += bones[ index.y ] * tang * weights.y;
+	T += bones[ index.z ] * tang * weights.z;
+	T += bones[ index.w ] * tang * weights.w;
+
 	vPosition = m * P;
-	vWorldNormal = normalize(m * vec4(normal.xyz, 0));
+	vWorldNormal = normalize(m * N);
 	vUV = uv;
+
+	vTangent = normalize(m * T).xyz;
+	vBiTangent = cross(vWorldNormal.xyz, vTangent.xyz);
 
 	gl_Position = projectionViewWorldMatrix * P;
 }
