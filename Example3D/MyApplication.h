@@ -26,8 +26,6 @@ public:
 
 	//void generateGrid(unsigned int rows, unsigned int cols); // function to create grid
 
-
-
 	Camera camera;
 
 
