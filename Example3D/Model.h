@@ -2,6 +2,7 @@
 #include "glm\glm\glm.hpp"
 #include "tiny_obj_loader.h"
 #include "FBXLoader\FBXFile.h"
+#include "Shader.h"
 
 #include <vector>
 
@@ -36,7 +37,7 @@ public:
 
 	bool Load(const char* modelFile, const char* textureFile, const char* normalMapFile, const char* specularMapFile);
 
-	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID);
+	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader);
 
 	void createOpenGLBuffers(tinyobj::attrib_t& attribs, std::vector<tinyobj::shape_t>&shapes);
 

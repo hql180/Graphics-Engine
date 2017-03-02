@@ -9,7 +9,7 @@ out vec4 vWorldNormal;
 out vec2 vUV;
 
 
-uniform mat4 projectionViewWorldMatrix;
+uniform mat4 MVP;
 uniform mat4 m;
 
 void main()
@@ -18,5 +18,5 @@ void main()
 	vPosition = position;
 	vWorldNormal = m * vec4(normal.xyz, 0);
 	vUV = uv;
-	gl_Position = projectionViewWorldMatrix * position;
+	gl_Position = MVP * position;
 }

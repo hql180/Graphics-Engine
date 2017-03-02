@@ -5,6 +5,8 @@
 #include "glm\glm\mat4x4.hpp"
 #include "tiny_obj_loader.h"
 #include "Model.h"
+#include "Scene.h"
+#include "Shader.h"
 
 class MyApplication : public aie::Application
 {
@@ -33,11 +35,6 @@ public:
 private:
 	glm::mat4 m_projectionMatrix;
 	glm::mat4 m_viewMatrix;
-	glm::mat4 m_modelMatrix;
-
-	unsigned int m_VAO;
-	unsigned int m_VBO;
-	unsigned int m_IBO;
 
 	const char* vsSource = "../Example3D/Shaders/vertexShader.vert";
 	const char* fsSource = "../Example3D/Shaders/fragmentShader.frag";
@@ -47,15 +44,12 @@ private:
 */
 	float m_time;
 
-	unsigned int m_programID;
+	Model pyro;
 
-	unsigned int m_animProgramID;
+	Scene m_scene;
 
-	glm::vec3 lightDirection;
-	glm::vec3 lightColour;
+	std::vector<Shader> m_shaders;
 
-	float specPow;	
-
-	Model testModel;
+	bool m_orbitOn;
 };
 

@@ -12,6 +12,23 @@ Instance::~Instance()
 {
 }
 
+//Instance::Instance(Model * model)
+//{
+//	m_model = model;
+//	m_pos = glm::vec3(0);
+//	m_euler = glm::vec3(0);
+//	m_scale = glm::vec3(1);
+//}
+
+Instance::Instance(Model * model, Shader* shader, glm::vec3 pos, glm::vec3 euler, glm::vec3 scale)
+{
+	m_model = model;
+	m_pos = pos;
+	m_euler = euler;
+	m_scale = scale;
+	m_shader = shader;
+}
+
 void Instance::updateTransform()
 {
 	float rad = 6.28f / 360.0f;
@@ -24,7 +41,7 @@ void Instance::updateTransform()
 
 void Instance::draw(Scene * scene)
 {
-	scene->useShader(m_model->isAnimated() ? m_animatedShader : m_shader);
+	scene->useShader(m_shader);
 
-	m_model->Draw(m_transform, )
+	m_model->Draw(m_transform, scene->getCameraMatrix(), m_shader);
 }

@@ -2,10 +2,11 @@
 #include "glm\glm\glm.hpp"
 #include "Camera.h"
 #include "Instance.h"
+#include "Shader.h"
 #include <vector>
 
 
-class MyApplication;
+class Application;
 
 class Scene
 {
@@ -15,7 +16,9 @@ public:
 
 	void draw();
 
-	void useShader(unsigned int shader);
+	void useShader(Shader* shader);
+
+	void update(float dt, float screenHeight, float screenWidth, Camera & camera, bool orbitingLight);
 
 	glm::mat4 getCameraMatrix();
 
@@ -23,14 +26,24 @@ public:
 
 	Camera m_camera;
 
+	Shader* m_shader;
+
 	glm::vec3 m_lightDir;
 
 	glm::vec3 m_pointLights[4];
 
 	glm::vec3 m_pointLightColours[4];
 
+	glm::vec3 m_lightColour;
+
 	float m_pointLightPowers[4];
 
-	MyApplication* app;
+	float m_specPow;
+
+	float m_lightIntensity;
+
+	float m_screenHeight;
+
+	float m_screenWidth;
 };
 

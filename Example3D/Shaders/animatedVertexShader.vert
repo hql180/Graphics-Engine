@@ -13,7 +13,7 @@ out vec3 vTangent; // worldspace
 out vec3 vBiTangent; // worldspace
 
 
-uniform mat4 projectionViewWorldMatrix;
+uniform mat4 MVP;
 uniform mat4 m;
 
 const int MAX_BONES = 128;
@@ -47,5 +47,5 @@ void main()
 	vTangent = normalize(m * T).xyz;
 	vBiTangent = cross(vWorldNormal.xyz, vTangent.xyz);
 
-	gl_Position = projectionViewWorldMatrix * P;
+	gl_Position = MVP * P;
 }

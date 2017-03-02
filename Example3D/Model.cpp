@@ -141,15 +141,15 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 	return false;
 }
 
-void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, unsigned int programID)
+void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader)
 {
 	mat4 mvp = cameraMatrix * transform;
 
-	unsigned int projectionViewUniform = glGetUniformLocation(programID, "projectionViewWorldMatrix");
-	glUniformMatrix4fv(projectionViewUniform, 1, GL_FALSE, (float*)&mvp);
+	shader->SetUniform(mvp, Uniform::MVP);
 
-	unsigned int modelUniform = glGetUniformLocation(programID, "m");
-	glUniformMatrix4fv(modelUniform, 1, GL_FALSE, (float*) &transform);
+	shader->SetUniform(transform, Uniform::MODELTRANSFORM);
+
+	unsigned int programID = shader->GetID();
 
 	if (m_texture != NULL)
 	{	

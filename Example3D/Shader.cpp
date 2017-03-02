@@ -2,7 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <intrin.h>
 #include "Shader.h"
+
 
 bool Shader::LoadShaderFromFile(const char* filePath, std::string& code)
 {
@@ -21,6 +23,14 @@ bool Shader::LoadShaderFromFile(const char* filePath, std::string& code)
 		printf("Cannot open shader file %s.\n", filePath);
 		return false;
 	}
+}
+
+Shader::Shader()
+{
+}
+
+Shader::~Shader()
+{
 }
 
 GLuint Shader::CompileShaders(const char* vsFile, const char* fsFile)
@@ -57,4 +67,81 @@ GLuint Shader::CompileShaders(const char* vsFile, const char* fsFile)
 	glDeleteShader(vertexShader);
 
 	return programID;
+}
+
+void Shader::SetShader(const char * vsFile, const char * fsFile)
+{
+	m_programID = CompileShaders(vsFile, fsFile);
+}
+
+unsigned int Shader::GetID()
+{
+	return m_programID;
+}
+
+void Shader::SetID(unsigned int programID)
+{
+	m_programID = programID;
+}
+
+void Shader::SetUniform(const glm::vec3& uniform, Uniform uniformName)
+{
+	unsigned int loc;
+
+	switch (uniformName)
+	{
+	case Uniform::CAMERAPOS:
+		loc = glGetUniformLocation(m_programID, "cameraPos");
+		glUniform3f(loc, uniform.x, uniform.y, uniform.z);
+		break;
+	case Uniform::LIGHTDIR:
+		loc = glGetUniformLocation(m_programID, "lightDirection");
+		glUniform3f(loc, uniform.x, uniform.y, uniform.z);
+		break;
+	case Uniform::LIGHTCOL:
+		loc = glGetUniformLocation(m_programID, "lightColour");
+		glUniform3f(loc, uniform.x, uniform.y, uniform.z);
+		break;
+	default:
+		std::cout << "Failed to set vec3 uniform" << std::endl;
+	}
+}
+
+void Shader::SetUniform(const float& uniform, Uniform uniformName)
+{
+	unsigned int loc;
+
+	switch (uniformName)
+	{
+	case Uniform::SPECPOWER:
+		loc = glGetUniformLocation(m_programID, "specPow");
+		glUniform1f(loc, uniform);
+		break;
+	case Uniform::LIGHTINTENSITY:
+		loc = glGetUniformLocation(m_programID, "lightIntensity");
+		glUniform1f(loc, uniform);
+		break;
+	default:
+		std::cout << "Failed to set float uniform" << std::endl;
+	}
+}
+
+void Shader::SetUniform(const glm::mat4& uniform, Uniform uniformName)
+{
+	unsigned int loc;
+
+	switch (uniformName)
+	{
+	case MVP:
+		loc = glGetUniformLocation(m_programID, "MVP");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)&uniform);
+		break;
+	case MODELTRANSFORM:
+		loc = glGetUniformLocation(m_programID, "m");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)&uniform);
+		break;
+	default:
+		std::cout << "Failed to set matrix4 uniform" << std::endl;
+		break;
+	}
 }

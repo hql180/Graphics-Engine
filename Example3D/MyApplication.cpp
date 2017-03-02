@@ -10,6 +10,8 @@
 #include "FBXLoader\FBXFile.h"
 #include <iostream>
 #include "glfw\include\GLFW\glfw3.h"
+#include "Instance.h"
+#include "imgui\imgui.h"
 
 #define STB_IMAGE_IMPLEMENTATION 
 
@@ -40,9 +42,7 @@ bool MyApplication::startup()
 		getWindowWidth() / (float)getWindowHeight(),
 		0.1f, 1000.f);
 
-	m_programID = Shader::CompileShaders(vsSource, fsSource);
 
-	m_animProgramID = Shader::CompileShaders("../Example3D/Shaders/animatedVertexShader.vert", fsSource);
 
 	//// shader
 
@@ -84,11 +84,31 @@ bool MyApplication::startup()
 
 	
 	// testModel.Load("../Example3D/Models/Iron_Man.obj", "../Example3D/Models/Iron_Man.tga");
+
+	Shader temp1;
+	temp1.SetShader(vsSource, fsSource);
+	m_shaders.push_back(temp1);
+
+	Shader temp2;
+	temp2.SetShader("../Example3D/Shaders/animatedVertexShader.vert", fsSource);
+	m_shaders.push_back(temp2);
+
+
+	if (!pyro.Load("../Example3D/Models/Pyro/pyro.fbx",
+		"../Example3D/Models/Pyro/Pyro_D.tga",
+		"../Example3D/Models/Pyro/Pyro_N.tga",
+		"../Example3D/Models/Pyro/Pyro_S.tga"))
+		return false;
+
 	
-	return testModel.Load("../Example3D/Models/Pyro/pyro.fbx", 
-						"../Example3D/Models/Pyro/Pyro_D.tga", 
-						"../Example3D/Models/Pyro/Pyro_N.tga",
-						"../Example3D/Models/Pyro/Pyro_S.tga");
+	for (int i = 0; i < 10; ++i)
+	{
+		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3(glm::cos(i)*2, glm::sin(i)*2, glm::cos(i)*glm::sin(i)*2), vec3(glm::tan(i)*19), vec3(0.001f)));
+	}	
+	
+	m_orbitOn = true;
+
+	return true;
 }
 
 void MyApplication::shutdown()
@@ -100,9 +120,9 @@ void MyApplication::update(float dt)
 {
 	m_time = getTime();
 
-	testModel.Update(m_time);
-
 	camera.Update();
+
+	m_scene.update(m_time, getWindowHeight(), getWindowWidth(), camera, m_orbitOn);
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -149,64 +169,18 @@ void MyApplication::draw()
 
 	m_viewMatrix = camera.GetViewMatrix();
 
-	static float angle = 0;
-	//angle += 0.01f;
-	m_modelMatrix = glm::rotate(angle, glm::vec3(0, 1, 0)) *glm::scale(glm::vec3(0.003f));
-
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
-	//lightDirection = vec3(0.5, 0.7, 0.5);
-	lightDirection = glm::vec3(sin(glfwGetTime()), .7, cos(glfwGetTime()));
-	lightColour = vec3(1, 1, 1);
-	float lightIntensity = 1.0f;
-	specPow = 20;
+	m_scene.draw();
 
-	unsigned int& usingID = testModel.isAnimated() ? m_animProgramID : m_programID;
+	ImGui::Begin("Lights");
+	ImGui::Checkbox("Auto Orbit Light", &m_orbitOn);
+	ImGui::SliderFloat3("Light Pos", (float*)&m_scene.m_lightDir, -10, 10);
+	ImGui::SliderFloat3("Point Light Pos", &m_scene.m_pointLights[0].x, -20, 20);
+	ImGui::SliderFloat3("Point Light Color", &m_scene.m_pointLightColours[0].x, 0, 1);
+	ImGui::SliderFloat("Point Light Power", &m_scene.m_pointLightPowers[0], 0, 100);
+	ImGui::End();
 
-	glUseProgram(usingID); 
-	// get a ticket for the address of a named uniform in shader code
-
-	/// Handled in new draw class ///
-	//unsigned int projectionViewUniform = glGetUniformLocation(m_programID, "projectionViewWorldMatrix"); 
-	//// pass value in through that address
-	//// uniforms are the same for every vertex
-	//glUniformMatrix4fv(projectionViewUniform, 1, false, glm::value_ptr(mvp)); 
-
-
-	unsigned int lightDirectionUniform = glGetUniformLocation(usingID, "lightDirection");
-	//glUniform4d(lightDirectionUniform,
-	glUniform3f(lightDirectionUniform, lightDirection.x, lightDirection.y, lightDirection.z);
-
-	unsigned int lightColourUniform = glGetUniformLocation(usingID, "lightColour");
-	glUniform3f(lightColourUniform, lightColour.x, lightColour.y, lightColour.z);
-
-	unsigned int cameraUniform = glGetUniformLocation(usingID, "cameraPos");
-	glUniform3f(cameraUniform, camera.position.x, camera.position.y, camera.position.z);
-
-	unsigned int specPowUniform = glGetUniformLocation(usingID, "specPow");
-	glUniform1f(specPowUniform, specPow);
-
-	unsigned int lightIntensityUniform = glGetUniformLocation(usingID, "lightIntensity");
-	glUniform1f(lightIntensityUniform, lightIntensity);
-	
-	testModel.Draw(m_modelMatrix, m_projectionMatrix * m_viewMatrix, usingID);
-	
-
-
-	
-	//static float x = -5;
-	//x += 0.1f;
-	//if (x > 5)
-	//	x -= 10;
-	//m_modelMatrix = glm::translate(vec3(x, 0, 0)) * m_modelMatrix;
-	
-		
-	//for (auto & gl : m_glInfo)
-	//{
-	//	// bind vao before drawing down below
-	//	glBindVertexArray(gl.m_VAO);
-	//	glDrawArrays(GL_TRIANGLES, 0, gl.m_faceCount * 3);
-	//}
 }
 
 //void MyApplication::generateGrid(unsigned int rows, unsigned int cols)
