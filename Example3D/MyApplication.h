@@ -7,6 +7,7 @@
 #include "Model.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "FrameBuffer.h"
 
 class MyApplication : public aie::Application
 {
@@ -51,5 +52,9 @@ private:
 	std::vector<Shader> m_shaders;
 
 	bool m_orbitOn;
+
+	FrameBuffer* pFrameBuffer;
+
+	Model screenQuad;
 };
 

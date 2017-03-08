@@ -93,6 +93,10 @@ bool MyApplication::startup()
 	temp2.SetShader("../Example3D/Shaders/animatedVertexShader.vert", fsSource);
 	m_shaders.push_back(temp2);
 
+	Shader frameBuffShader;
+	frameBuffShader.SetShader("../Example3D/Shaders/frameBuffer.vert", "../Example3D/Shaders/frameBuffer.frag");
+	m_shaders.push_back(frameBuffShader);
+
 
 	if (!pyro.Load("../Example3D/Models/Pyro/pyro.fbx",
 		"../Example3D/Models/Pyro/Pyro_D.tga",
@@ -103,10 +107,20 @@ bool MyApplication::startup()
 	
 	for (int i = 0; i < 10; ++i)
 	{
-		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3(glm::cos(i)*2, glm::sin(i)*2, glm::cos(i)*glm::sin(i)*2), vec3(glm::tan(i)*19), vec3(0.001f)));
+		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
 	}	
 	
 	m_orbitOn = true;
+
+	//m_scene.m_instances.push_back(new Instance(&screenQuad, &m_shaders[2]));
+
+	pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
+	pFrameBuffer->SetUp();
+
+	Model* quadModel = new Model();
+	quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
+	pFrameBuffer->SetQuad(quadModel);
+
 
 	return true;
 }
@@ -171,7 +185,10 @@ void MyApplication::draw()
 
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
 
-	m_scene.draw();
+	//m_scene.draw();
+
+	pFrameBuffer->RenderScene(m_scene);
+	pFrameBuffer->Draw(&m_shaders[2]);
 
 	ImGui::Begin("Lights");
 	ImGui::Checkbox("Auto Orbit Light", &m_orbitOn);

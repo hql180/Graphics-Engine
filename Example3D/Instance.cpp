@@ -12,14 +12,6 @@ Instance::~Instance()
 {
 }
 
-//Instance::Instance(Model * model)
-//{
-//	m_model = model;
-//	m_pos = glm::vec3(0);
-//	m_euler = glm::vec3(0);
-//	m_scale = glm::vec3(1);
-//}
-
 Instance::Instance(Model * model, Shader* shader, glm::vec3 pos, glm::vec3 euler, glm::vec3 scale)
 {
 	m_model = model;

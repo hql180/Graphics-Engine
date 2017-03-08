@@ -3,6 +3,7 @@
 #include "MyApplication.h"
 #include "glfw\include\GLFW\glfw3.h"
 #include "Application.h"
+#include "Gizmos.h"
 
 Scene::Scene()
 {
@@ -22,6 +23,8 @@ void Scene::draw()
 	{
 		instance->draw(this);
 	}
+
+	aie::Gizmos::draw(getCameraMatrix());
 }
 
 void Scene::useShader(Shader* shader)

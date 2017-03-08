@@ -49,6 +49,8 @@ public:
 
 	bool isAnimated();
 
+	void makePostProcessQuad(float screenWidth, float screenHeight);
+
 	FBXFile* m_fbx;
 
 	unsigned int m_texture;
