@@ -33,6 +33,16 @@ void Instance::updateTransform()
 
 void Instance::draw(Scene * scene)
 {
+	glm::mat4 mvp = scene->getCameraMatrix() * scene->m_camera.GetViewMatrix() * m_transform;
+	glm::vec3 screenPos(mvp[3][0] / mvp[3][3], mvp[3][1] / mvp[3][3], mvp[3][2]);
+
+	float edge = 0.75f;
+	if (screenPos.x < -edge || screenPos.x > edge ||
+		screenPos.y < -edge || screenPos.y > edge)
+	{
+		return;
+	}
+	
 	scene->useShader(m_shader);
 
 	m_model->Draw(m_transform, scene->getCameraMatrix(), m_shader);

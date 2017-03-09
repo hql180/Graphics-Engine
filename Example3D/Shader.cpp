@@ -126,6 +126,14 @@ void Shader::SetUniform(const float& uniform, Uniform uniformName)
 	}
 }
 
+void Shader::SetUniform(const float & uniform, const char * uniformName)
+{
+	unsigned int loc;
+
+	loc = glGetUniformLocation(m_programID, uniformName);
+	glUniform1f(loc, uniform);
+}
+
 void Shader::SetUniform(const glm::mat4& uniform, Uniform uniformName)
 {
 	unsigned int loc;
@@ -142,6 +150,37 @@ void Shader::SetUniform(const glm::mat4& uniform, Uniform uniformName)
 		break;
 	default:
 		std::cout << "Failed to set matrix4 uniform" << std::endl;
+		break;
+	}
+}
+
+void Shader::SetUniform(const bool & uniform, Uniform uniformName)
+{
+	unsigned int loc;
+
+	switch (uniformName)
+	{
+	case DISTORT:
+		loc = glGetUniformLocation(m_programID, "distortU");
+		glUniform1i(loc, uniform);
+		break;
+	case SHARPEN:
+		loc = glGetUniformLocation(m_programID, "sharpenU");
+		glUniform1i(loc, uniform);
+		break;
+	case SOBEL:
+		loc = glGetUniformLocation(m_programID, "sobelU");
+		glUniform1i(loc, uniform);
+		break;
+	case BLUR:
+		loc = glGetUniformLocation(m_programID, "blurU");
+		glUniform1i(loc, uniform);
+		break;
+	case RADIALBLUR:
+		loc = glGetUniformLocation(m_programID, "radialBlurU");
+		glUniform1i(loc, uniform);
+		break;
+	default:
 		break;
 	}
 }

@@ -53,6 +53,16 @@ private:
 
 	bool m_orbitOn;
 
+	bool m_distort;
+
+	bool m_sharpen;
+
+	bool m_sobel;
+
+	bool m_blur;
+
+	bool m_radialBlur;
+
 	FrameBuffer* pFrameBuffer;
 
 	Model screenQuad;

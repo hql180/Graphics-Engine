@@ -10,7 +10,12 @@ enum Uniform
 	SPECPOWER,
 	LIGHTINTENSITY,
 	MVP,
-	MODELTRANSFORM
+	MODELTRANSFORM,
+	DISTORT,
+	SHARPEN,
+	SOBEL,
+	BLUR,
+	RADIALBLUR
 };
 
 class Shader
@@ -31,7 +36,11 @@ public:
 
 	void SetUniform(const float& uniform, Uniform uniformName);
 
+	void SetUniform(const float& uniform, const char* uniformName);
+
 	void SetUniform(const glm::mat4& uniform, Uniform uniformName);
+
+	void SetUniform(const bool& uniform, Uniform uniformName);
 
 private:
 	static bool LoadShaderFromFile(const char* filePath, std::string& code);

@@ -112,6 +112,16 @@ bool MyApplication::startup()
 	
 	m_orbitOn = true;
 
+	m_distort = false;
+
+	m_sharpen = false;
+
+	m_sobel = false;
+
+	m_blur = false;
+
+	m_radialBlur = false;
+
 	//m_scene.m_instances.push_back(new Instance(&screenQuad, &m_shaders[2]));
 
 	pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
@@ -190,6 +200,17 @@ void MyApplication::draw()
 	pFrameBuffer->RenderScene(m_scene);
 	pFrameBuffer->Draw(&m_shaders[2]);
 
+	// frameBuffer Uniforms
+	m_shaders[2].SetUniform(m_distort, Uniform::DISTORT);
+	m_shaders[2].SetUniform(m_sharpen, Uniform::SHARPEN);
+	m_shaders[2].SetUniform(m_blur, Uniform::BLUR);
+	m_shaders[2].SetUniform(m_sobel, Uniform::SOBEL);
+	m_shaders[2].SetUniform(m_radialBlur, Uniform::RADIALBLUR);
+	m_shaders[2].SetUniform(m_scene.m_lightDir, Uniform::LIGHTDIR);
+	m_shaders[2].SetUniform(m_projectionMatrix * m_viewMatrix, MVP);
+
+	m_shaders[2].SetUniform(m_time, "iGlobalTime");
+
 	ImGui::Begin("Lights");
 	ImGui::Checkbox("Auto Orbit Light", &m_orbitOn);
 	ImGui::SliderFloat3("Light Pos", (float*)&m_scene.m_lightDir, -10, 10);
@@ -198,6 +219,14 @@ void MyApplication::draw()
 	ImGui::SliderFloat("Point Light Power", &m_scene.m_pointLightPowers[0], 0, 100);
 	ImGui::End();
 
+	ImGui::Begin("Post-Processing");
+	ImGui::Checkbox("Distort", &m_distort);
+	ImGui::Checkbox("Blur", &m_blur);
+	ImGui::Checkbox("Sharpen", &m_sharpen);
+	ImGui::Checkbox("Sobel Operator", &m_sobel);
+	ImGui::Checkbox("Radial Blur", &m_radialBlur);
+	
+	ImGui::End();
 }
 
 //void MyApplication::generateGrid(unsigned int rows, unsigned int cols)
