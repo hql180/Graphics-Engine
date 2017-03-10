@@ -47,6 +47,8 @@ private:
 
 	Model pyro;
 
+	Model buns;
+
 	Scene m_scene;
 
 	std::vector<Shader> m_shaders;
@@ -66,5 +68,7 @@ private:
 	FrameBuffer* pFrameBuffer;
 
 	Model screenQuad;
+
+	float m_prevHeight, m_prevWidth;
 };
 

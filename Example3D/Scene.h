@@ -45,5 +45,9 @@ public:
 	float m_screenHeight;
 
 	float m_screenWidth;
+
+	static int culled;
+
+	bool showBounds;
 };
 

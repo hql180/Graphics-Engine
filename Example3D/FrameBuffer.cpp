@@ -64,8 +64,22 @@ void FrameBuffer::SetUp()
 	// detach frame buffer from current so 
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	// render buffers?
+}
+
+void FrameBuffer::RecreateBuffer(int w, int h)
+{
+	width = w;
+	height = h;
+
+	glDeleteFramebuffers(1, &m_fbo);
+	glDeleteTextures(1, &m_fboTexture);
+	glDeleteRenderbuffers(1, &m_fboDepth);		
+
+	SetUp();
 }
 
 void FrameBuffer::SetQuad(Model * model)
@@ -87,7 +101,7 @@ void FrameBuffer::RenderScene(Scene & scene)
 
 	// restore normal frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 1280, 720);
+	glViewport(0, 0, scene.m_screenWidth, scene.m_screenHeight);
 	glClearColor(0.0f, 0.0f, 0.25f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

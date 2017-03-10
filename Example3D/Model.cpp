@@ -1,6 +1,7 @@
 #include "Model.h"
 #include "Texture.h"
 #include "gl_core_4_4.h"
+#include <algorithm>
 
 using glm::mat4;
 
@@ -301,6 +302,8 @@ void Model::createOpenGLBuffers(tinyobj::attrib_t & attribs, std::vector<tinyobj
 		// shifts index to next shape
 		shapeIndex++;
 	}
+
+	calculateBounds(attribs);
 }
 
 void Model::createOpenGLBuffers(FBXFile * fbx)
@@ -364,6 +367,8 @@ void Model::createOpenGLBuffers(FBXFile * fbx)
 				
 		mesh->m_userData = glData;
 	}
+
+	calculateBounds(fbx);
 }
 
 void Model::cleanupOpenGLBuffers(FBXFile * fbx)
@@ -401,6 +406,8 @@ void Model::Update(float dt)
 
 bool Model::isAnimated()
 {
+	if (m_fbx == nullptr)
+		return false;
 	return m_fbx && m_fbx->getSkeletonCount() > 0;
 }
 
@@ -439,5 +446,49 @@ void Model::makePostProcessQuad(float screenWidth, float screenHeight)
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Model::calculateBounds(tinyobj::attrib_t & attribs)
+{
+	float radius = 0;
+
+	for (int k = 0; k < attribs.vertices.size(); k += 3)
+	{
+		boundsMin.x = std::min(boundsMin.x, attribs.vertices[k]); // x
+		boundsMin.y = std::min(boundsMin.y, attribs.vertices[k + 1]); // y
+		boundsMin.z = std::min(boundsMin.z, attribs.vertices[k + 2]); // z
+		boundsMax.x = std::max(boundsMax.x, attribs.vertices[k]);
+		boundsMax.y = std::max(boundsMax.y, attribs.vertices[k + 1]);
+		boundsMax.z = std::max(boundsMax.z, attribs.vertices[k + 2]);
+		radius = std::max(radius,
+			sqrtf(attribs.vertices[k] * attribs.vertices[k] 
+				+ attribs.vertices[k + 1] * attribs.vertices[k + 1] 
+				+ attribs.vertices[k + 2] * attribs.vertices[k + 2]));
+	}
+}
+
+void Model::calculateBounds(FBXFile * fbx)
+{
+	float radius = 0;
+
+	for (unsigned int i = 0; i < fbx->getMeshCount(); ++i)
+	{
+		FBXMeshNode* mesh = fbx->getMeshByIndex(i);
+		
+		for (auto& vert : mesh->m_vertices)
+		{
+			boundsMin.x = std::min(boundsMin.x, vert.position.x); // x
+			boundsMin.y = std::min(boundsMin.y, vert.position.y); // y
+			boundsMin.z = std::min(boundsMin.z, vert.position.z); // z
+			boundsMax.x = std::max(boundsMax.x, vert.position.x);
+			boundsMax.y = std::max(boundsMax.y, vert.position.y);
+			boundsMax.z = std::max(boundsMax.z, vert.position.z);
+			radius = std::max(radius,
+				sqrtf(vert.position.x * vert.position.x
+					+ vert.position.y * vert.position.y
+					+ vert.position.z * vert.position.z));
+		}
+	}
+
 }
 

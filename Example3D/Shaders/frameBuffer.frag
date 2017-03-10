@@ -174,7 +174,7 @@ vec4 radialBlur()
 	// Light offset. Kind of fake. See above.
     vec3 l = normalize(lOff());
 
-	l = (MVP * vec4(lightDirection, 0)).xyz;s   
+	l = (MVP * vec4(lightDirection, 0)).xyz;  
 
     // Offset texture position (uv - .5), offset again by the fake light movement.
     // It's used to set the blur direction (a direction vector of sorts), and is used 
@@ -233,7 +233,6 @@ void main()
 	tempColour = blurU ? boxBlur() : tempColour;	
 	tempColour = sharpenU ? sharpen() : tempColour;
 	tempColour = radialBlurU ? radialBlur() : tempColour;
-
 	
 	FragColour = tempColour;
 

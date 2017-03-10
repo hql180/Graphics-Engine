@@ -51,7 +51,14 @@ public:
 
 	void makePostProcessQuad(float screenWidth, float screenHeight);
 
-	FBXFile* m_fbx;
+	void calculateBounds(tinyobj::attrib_t & attribs);
+
+	void calculateBounds(FBXFile* fbx);
+
+	glm::vec3 boundsMin;
+	glm::vec3 boundsMax;
+
+	FBXFile* m_fbx = nullptr;
 
 	unsigned int m_texture;
 

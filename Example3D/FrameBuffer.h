@@ -12,6 +12,8 @@ public:
 
 	void SetUp();
 
+	void RecreateBuffer(int w, int h);
+
 	void SetQuad(Model* model);
 
 	void RenderScene(Scene& scene);

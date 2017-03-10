@@ -15,7 +15,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION 
 
-
 using glm::vec3;
 using glm::vec4;
 using glm::mat4;
@@ -104,12 +103,20 @@ bool MyApplication::startup()
 		"../Example3D/Models/Pyro/Pyro_S.tga"))
 		return false;
 
+	if (!buns.Load("../Example3D/Models/Bunny.obj"))
+		return false;
+
 	
-	for (int i = 0; i < 10; ++i)
+	
+	for (int i = 0; i < 500; ++i)
 	{
-		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
+		//m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
 	}	
 	
+	
+	
+
+
 	m_orbitOn = true;
 
 	m_distort = false;
@@ -124,13 +131,28 @@ bool MyApplication::startup()
 
 	//m_scene.m_instances.push_back(new Instance(&screenQuad, &m_shaders[2]));
 
+	//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
+	//pFrameBuffer->SetUp();
+
 	pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
 	pFrameBuffer->SetUp();
+
+	/*Model* quadModel = new Model();
+	quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
+	pFrameBuffer->SetQuad(quadModel);*/
 
 	Model* quadModel = new Model();
 	quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
 	pFrameBuffer->SetQuad(quadModel);
 
+	m_prevWidth = getWindowWidth();
+	m_prevHeight = getWindowHeight();
+
+	for (int i = 0; i < 500; ++i)
+	{
+		m_scene.m_instances.push_back(new Instance(&buns, &m_shaders[0], vec3(0.1f*i, 0, 0.1f*i), vec3(0.1f*i), vec3(0.5f)));
+
+	}
 
 	return true;
 }
@@ -147,6 +169,21 @@ void MyApplication::update(float dt)
 	camera.Update();
 
 	m_scene.update(m_time, getWindowHeight(), getWindowWidth(), camera, m_orbitOn);
+
+	if (m_prevWidth != getWindowWidth() || m_prevHeight != getWindowHeight())
+	{
+		pFrameBuffer->RecreateBuffer(getWindowWidth(), getWindowHeight());
+		//delete pFrameBuffer->m_model;
+		//delete pFrameBuffer;
+		//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
+		//pFrameBuffer->SetUp();
+		//Model* quadModel = new Model();
+		//quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
+		//pFrameBuffer->SetQuad(quadModel);
+
+		m_prevWidth = getWindowWidth();
+		m_prevHeight = getWindowHeight();
+	}
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -167,16 +204,16 @@ void MyApplication::update(float dt)
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
 
-	// demonstrate a few shapes
-	Gizmos::addAABBFilled(vec3(0), vec3(1), vec4(0, 0.5f, 1, 0.25f));
-	Gizmos::addSphere(vec3(5, 0, 5), 1, 8, 8, vec4(1, 0, 0, 0.5f));
-	Gizmos::addRing(vec3(5, 0, -5), 1, 1.5f, 8, vec4(0, 1, 0, 1));
-	Gizmos::addDisk(vec3(-5, 0, 5), 1, 16, vec4(1, 1, 0, 1));
-	Gizmos::addArc(vec3(-5, 0, -5), 0, 2, 1, 8, vec4(1, 0, 1, 1));
+	//// demonstrate a few shapes
+	//Gizmos::addAABBFilled(vec3(0), vec3(1), vec4(0, 0.5f, 1, 0.25f));
+	//Gizmos::addSphere(vec3(5, 0, 5), 1, 8, 8, vec4(1, 0, 0, 0.5f));
+	//Gizmos::addRing(vec3(5, 0, -5), 1, 1.5f, 8, vec4(0, 1, 0, 1));
+	//Gizmos::addDisk(vec3(-5, 0, 5), 1, 16, vec4(1, 1, 0, 1));
+	//Gizmos::addArc(vec3(-5, 0, -5), 0, 2, 1, 8, vec4(1, 0, 1, 1));
 
-	mat4 t = glm::rotate(m_time, glm::normalize(vec3(1, 1, 1)));
-	t[3] = vec4(-2, 0, 0, 1);
-	Gizmos::addCylinderFilled(vec3(0), 0.5f, 1, 5, vec4(0, 1, 1, 1), &t);
+	//mat4 t = glm::rotate(m_time, glm::normalize(vec3(1, 1, 1)));
+	//t[3] = vec4(-2, 0, 0, 1);
+	//Gizmos::addCylinderFilled(vec3(0), 0.5f, 1, 5, vec4(0, 1, 1, 1), &t);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -226,6 +263,12 @@ void MyApplication::draw()
 	ImGui::Checkbox("Sobel Operator", &m_sobel);
 	ImGui::Checkbox("Radial Blur", &m_radialBlur);
 	
+	ImGui::End();
+
+	ImGui::Begin("Fustum Culling");
+	ImGui::Checkbox("Show Bounding Boxes", &m_scene.showBounds);
+	ImGui::DragInt("Culled", &m_scene.culled);
+	ImGui::DragInt("FPS", (int*)&m_fps);
 	ImGui::End();
 }
 

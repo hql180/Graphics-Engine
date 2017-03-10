@@ -5,10 +5,13 @@
 #include "Application.h"
 #include "Gizmos.h"
 
+int Scene::culled = 0;
+
 Scene::Scene()
 {
 	m_specPow = 20;
-	m_lightIntensity = 1.0f;
+	m_lightIntensity = 1.0f;	
+	showBounds = false;
 }
 
 
@@ -19,6 +22,7 @@ Scene::~Scene()
 
 void Scene::draw()
 {
+	culled = 0;
 	for (auto& instance : m_instances)
 	{
 		instance->draw(this);

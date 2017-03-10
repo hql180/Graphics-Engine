@@ -106,5 +106,8 @@
     <None Include="Shaders\frameBuffer.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\basicOBJ.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

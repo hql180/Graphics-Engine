@@ -10,7 +10,7 @@ class Instance
 public:
 	Instance();
 	~Instance();
-
+	
 	//Instance(Model* model);
 
 	Instance(Model* model, Shader* shader, glm::vec3 pos = glm::vec3(0), glm::vec3 euler = glm::vec3(0), glm::vec3 scale = glm::vec3(1.0f));
