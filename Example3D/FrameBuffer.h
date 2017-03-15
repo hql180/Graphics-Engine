@@ -7,12 +7,12 @@ class FrameBuffer
 {
 public:
 	FrameBuffer();
-	FrameBuffer(int w, int h) : width(w), height(h) { SetUp(); }
+	FrameBuffer(float w, float h) : width(w), height(h) { SetUp(); }
 	~FrameBuffer();
 
 	void SetUp();
 
-	void RecreateBuffer(int w, int h);
+	void RecreateBuffer(float w, float h);
 
 	void SetQuad(Model* model);
 
@@ -24,7 +24,7 @@ public:
 	unsigned int m_fboTexture;
 	unsigned int m_fboDepth;
 
-	int width, height;
+	float width, height;
 
 	Model* m_model;
 };

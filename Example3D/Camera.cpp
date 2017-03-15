@@ -38,8 +38,8 @@ void Camera::Update()
 
 	float deltaTime = 0.1f;
 
-	float mx = input->getMouseX();
-	float my = input->getMouseY();
+	float mx = (float)input->getMouseX();
+	float my = (float)input->getMouseY();
 
 
 	if (input->isMouseButtonDown(aie::INPUT_MOUSE_BUTTON_RIGHT))
@@ -48,8 +48,8 @@ void Camera::Update()
 		phi += 0.05f * (my - lastMouseY);
 	}
 
-	lastMouseX = mx;
-	lastMouseY = my;
+	lastMouseX = (int)mx;
+	lastMouseY = (int)my;
 
 	// use WASD, ZX keys to move camera around
 	if (input->isKeyDown(aie::INPUT_KEY_Q))

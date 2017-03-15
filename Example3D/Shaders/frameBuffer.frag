@@ -149,10 +149,14 @@ vec4 sobel()
 
 	vec4 temp = sqrt (pow(X, vec4(2)) + pow(Y,vec4(2)));
 
-	//sqrt (pow(X, vec4(2)) + pow(Y,vec4(2)));
-	float intensity = (temp.x + temp.y + temp.z) /3;
-	vec4 edge = vec4(1-intensity, 1-intensity,1-intensity,1);
-	tempColour = tempColour * edge;
+	//for greyscale outline
+	//float intensity = (temp.x + temp.y + temp.z) /3;
+	//vec4 edge = vec4(1-intensity, 1-intensity, 1-intensity, 1);
+	vec4 edge = vec4(temp.x, temp.y, temp.z, 1);
+
+	tempColour = tempColour + edge;
+
+	//tempColour = temp;
 
 	return tempColour;
 

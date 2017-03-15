@@ -25,7 +25,7 @@ void FrameBuffer::SetUp()
 
 	// allocate memory for desired screen output with 8 bytes each on GPU
 
-	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, width, height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, (GLsizei)width, (GLsizei)height);
 
 	// set up filtering parameters for texture
 
@@ -44,7 +44,7 @@ void FrameBuffer::SetUp()
 
 	// allocate memory for depth buffer
 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, (GLsizei)width, (GLsizei)height);
 
 	// attach depth buffer to current frame buffer
 
@@ -70,7 +70,7 @@ void FrameBuffer::SetUp()
 	// render buffers?
 }
 
-void FrameBuffer::RecreateBuffer(int w, int h)
+void FrameBuffer::RecreateBuffer(float w, float h)
 {
 	width = w;
 	height = h;
@@ -91,7 +91,7 @@ void FrameBuffer::RenderScene(Scene & scene)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 
 	glClearColor(0.75f, 0.75f, 0.75f, 1); // could pass this in as argument, or ignore altogether
 
@@ -101,7 +101,7 @@ void FrameBuffer::RenderScene(Scene & scene)
 
 	// restore normal frame buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, scene.m_screenWidth, scene.m_screenHeight);
+	glViewport(0, 0, (GLsizei)scene.m_screenWidth, (GLsizei)scene.m_screenHeight);	
 	glClearColor(0.0f, 0.0f, 0.25f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

@@ -110,12 +110,10 @@ bool MyApplication::startup()
 	
 	for (int i = 0; i < 500; ++i)
 	{
-		//m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
+		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
 	}	
 	
 	
-	
-
 
 	m_orbitOn = true;
 
@@ -134,7 +132,10 @@ bool MyApplication::startup()
 	//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
 	//pFrameBuffer->SetUp();
 
-	pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
+	float width = (float)getWindowWidth();
+	float height = (float)getWindowHeight();
+
+	pFrameBuffer = new FrameBuffer(width, height);
 	pFrameBuffer->SetUp();
 
 	/*Model* quadModel = new Model();
@@ -142,17 +143,17 @@ bool MyApplication::startup()
 	pFrameBuffer->SetQuad(quadModel);*/
 
 	Model* quadModel = new Model();
-	quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
+	quadModel->makePostProcessQuad(width, height);
 	pFrameBuffer->SetQuad(quadModel);
 
-	m_prevWidth = getWindowWidth();
-	m_prevHeight = getWindowHeight();
+	m_prevWidth = width;
+	m_prevHeight = height;
 
-	for (int i = 0; i < 500; ++i)
-	{
-		m_scene.m_instances.push_back(new Instance(&buns, &m_shaders[0], vec3(0.1f*i, 0, 0.1f*i), vec3(0.1f*i), vec3(0.5f)));
+	//for (int i = 0; i < 500; ++i)
+	//{
+	//	m_scene.m_instances.push_back(new Instance(&buns, &m_shaders[0], vec3(0.1f*i, 0, 0.1f*i), vec3(0.1f*i), vec3(0.5f)));
 
-	}
+	//}
 
 	return true;
 }
@@ -168,11 +169,15 @@ void MyApplication::update(float dt)
 
 	camera.Update();
 
-	m_scene.update(m_time, getWindowHeight(), getWindowWidth(), camera, m_orbitOn);
+	float width = (float)getWindowWidth();
 
-	if (m_prevWidth != getWindowWidth() || m_prevHeight != getWindowHeight())
+	float height = (float)getWindowHeight();
+
+	m_scene.update(m_time, height, width, camera, m_orbitOn);
+
+	if (m_prevWidth != width || m_prevHeight != height)
 	{
-		pFrameBuffer->RecreateBuffer(getWindowWidth(), getWindowHeight());
+		pFrameBuffer->RecreateBuffer(width, height);
 		//delete pFrameBuffer->m_model;
 		//delete pFrameBuffer;
 		//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
@@ -181,8 +186,8 @@ void MyApplication::update(float dt)
 		//quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
 		//pFrameBuffer->SetQuad(quadModel);
 
-		m_prevWidth = getWindowWidth();
-		m_prevHeight = getWindowHeight();
+		m_prevWidth = width;
+		m_prevHeight = height;
 	}
 
 	// wipe the gizmos clean for this frame
@@ -226,7 +231,10 @@ void MyApplication::draw()
 {
 	clearScreen();	
 
-	m_projectionMatrix = camera.GetProjectionMatrix(getWindowWidth(), getWindowHeight());
+	float width = (float)getWindowWidth();
+	float height = (float)getWindowHeight();
+
+	m_projectionMatrix = camera.GetProjectionMatrix(width, height);
 
 	m_viewMatrix = camera.GetViewMatrix();
 

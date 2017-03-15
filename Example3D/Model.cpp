@@ -452,7 +452,7 @@ void Model::calculateBounds(tinyobj::attrib_t & attribs)
 {
 	float radius = 0;
 
-	for (int k = 0; k < attribs.vertices.size(); k += 3)
+	for (int k = 0; k < (int)attribs.vertices.size(); k += 3)
 	{
 		boundsMin.x = std::min(boundsMin.x, attribs.vertices[k]); // x
 		boundsMin.y = std::min(boundsMin.y, attribs.vertices[k + 1]); // y
