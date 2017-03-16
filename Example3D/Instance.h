@@ -23,6 +23,9 @@ public:
 	glm::vec3 m_euler;
 	glm::vec3 m_scale;
 
+	glm::vec4 m_baseCol;
+	glm::vec4 m_brightCol;
+
 	glm::mat4 m_transform;
 
 	Model* m_model;

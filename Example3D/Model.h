@@ -28,7 +28,6 @@ public:
 	Model();
 	~Model();
 
-	// OBJ STUFF
 	bool Load(const char * filename);
 
 	bool Load(const char* modelFile, const char* textureFile);
@@ -36,6 +35,8 @@ public:
 	bool Load(const char* modelFile, const char* textureFile, const char* normalMapFile);
 
 	bool Load(const char* modelFile, const char* textureFile, const char* normalMapFile, const char* specularMapFile);
+
+	bool Load(unsigned int texture);
 
 	void Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader);
 
@@ -55,12 +56,14 @@ public:
 
 	void calculateBounds(FBXFile* fbx);
 
+	
+
 	glm::vec3 boundsMin;
 	glm::vec3 boundsMax;
 
 	FBXFile* m_fbx = nullptr;
 
-	unsigned int m_texture;
+	std::vector<unsigned int> m_texture;
 
 	unsigned int m_normalmap;
 
@@ -70,19 +73,9 @@ public:
 
 	bool isFBX;
 
+	bool isEscher;
+
 	float m_timer;
-
-	// FBX stuff
-
-	//bool Load(const char* a_filename,
-	//			FBXFile::UNIT_SCALE a_scale = FBXFile::UNITS_METER,
-	//			bool a_loadTextures = true,
-	//			bool a_loadAnimations = true,
-	//			bool a_flipTextureY = true);
-
-	//unsigned int getMeshCount() const;
-
-	//FBXMeshNode* getMeshbyIndex(unsigned int a_index) const;
 
 };
 

@@ -109,5 +109,8 @@
     <None Include="Shaders\basicOBJ.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\escherShader.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -107,6 +107,15 @@ void Shader::SetUniform(const glm::vec3& uniform, Uniform uniformName)
 	}
 }
 
+void Shader::SetUniform(const glm::vec4 & uniform, const char * uniformName)
+{
+	unsigned int loc;
+
+	loc = glGetUniformLocation(m_programID, uniformName);
+	glUniform4f(loc, uniform.x, uniform.y, uniform.z, uniform.w);
+	
+}
+
 void Shader::SetUniform(const float& uniform, Uniform uniformName)
 {
 	unsigned int loc;

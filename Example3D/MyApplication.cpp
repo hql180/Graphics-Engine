@@ -20,6 +20,8 @@ using glm::vec4;
 using glm::mat4;
 using aie::Gizmos;
 
+int MyApplication::m_scribbleTextures[4];
+
 MyApplication::MyApplication()
 {
 }
@@ -41,49 +43,6 @@ bool MyApplication::startup()
 		getWindowWidth() / (float)getWindowHeight(),
 		0.1f, 1000.f);
 
-
-
-	//// shader
-
-	//int success = GL_FALSE;
-
-	////create a new vertex and fragment shader, and get tickets for them
-	//unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	//// set the source for the vertext shader to our code strng above, and compile
-	//glShaderSource(vertexShader, 1, (const char**)&vsSource, 0);
-	//glCompileShader(vertexShader);
-	//// and the same for the fragement shader
-	//glShaderSource(fragmentShader, 1, (const char**)&fsSource, 0);
-	//glCompileShader(fragmentShader);
-
-	//// create a new shader pipeline and store the ticket for it
-	//m_programID = glCreateProgram();
-
-	//// attach vertex and fragment shaders to shader pipeline these are fitted according to flags made at their creation
-	//glAttachShader(m_programID, vertexShader);
-	//glAttachShader(m_programID, fragmentShader);
-	//// link the whole pipeline
-	//glLinkProgram(m_programID);
-	//// checks for error and return message if one was found
-	//glGetProgramiv(m_programID, GL_LINK_STATUS, &success);
-	//if (success == GL_FALSE)
-	//{
-	//	int infoLogLength = 0; 
-	//	glGetProgramiv(m_programID, GL_INFO_LOG_LENGTH, &infoLogLength); 
-	//	char* infoLog = new char[infoLogLength]; 
-	//	glGetProgramInfoLog(m_programID, infoLogLength, 0, infoLog); 
-	//	printf("Error: Failed to link shader program!\n"); 
-	//	printf("%s\n", infoLog); delete[] infoLog;
-	//}
-
-	//// free memory shaders only need linked pipeline
-	//glDeleteShader(fragmentShader);
-	//glDeleteShader(vertexShader);
-
-	
-	// testModel.Load("../Example3D/Models/Iron_Man.obj", "../Example3D/Models/Iron_Man.tga");
-
 	Shader temp1;
 	temp1.SetShader(vsSource, fsSource);
 	m_shaders.push_back(temp1);
@@ -96,6 +55,10 @@ bool MyApplication::startup()
 	frameBuffShader.SetShader("../Example3D/Shaders/frameBuffer.vert", "../Example3D/Shaders/frameBuffer.frag");
 	m_shaders.push_back(frameBuffShader);
 
+	Shader temp3;
+	temp3.SetShader("../Example3D/Shaders/animatedVertexShader.vert", "../Example3D/Shaders/escherShader.frag");
+	m_shaders.push_back(temp3);
+
 
 	if (!pyro.Load("../Example3D/Models/Pyro/pyro.fbx",
 		"../Example3D/Models/Pyro/Pyro_D.tga",
@@ -103,17 +66,44 @@ bool MyApplication::startup()
 		"../Example3D/Models/Pyro/Pyro_S.tga"))
 		return false;
 
-	if (!buns.Load("../Example3D/Models/Bunny.obj"))
+	if (!escherPyro.Load("../Example3D/Models/Pyro/pyro.fbx",
+		"textures/scribble1.png",
+		"../Example3D/Models/Pyro/Pyro_N.tga",
+		"../Example3D/Models/Pyro/Pyro_S.tga"))
 		return false;
 
+	escherPyro.Load(Texture::LoadTexture("textures/scribble2.png"));
+	escherPyro.Load(Texture::LoadTexture("textures/scribble3.png"));
+	escherPyro.Load(Texture::LoadTexture("textures/scribble4.png"));
+	escherPyro.isEscher = true;
+
+	if (!buns.Load("../Example3D/Models/Pyro/pyro.fbx",
+		"textures/tile1.png",
+		"../Example3D/Models/Pyro/Pyro_N.tga",
+		"../Example3D/Models/Pyro/Pyro_S.tga"))
+		return false;
+
+	buns.Load(Texture::LoadTexture("textures/yellow.jpg"));
+	buns.Load(Texture::LoadTexture("textures/tile3.png"));
+	buns.Load(Texture::LoadTexture("textures/tile4.png"));
 	
 	
-	for (int i = 0; i < 500; ++i)
+	for (int i = 0; i < 10; ++i)
 	{
-		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3((float)glm::cos(i)*2.0f, (float)glm::sin(i)*2.0f, (float)glm::cos(i)*(float)glm::sin(i)*2.0f), vec3((float)glm::tan(i)*19.0f), vec3(0.001f)));
+		m_scene.m_instances.push_back(new Instance(&escherPyro, &m_shaders[3], vec3(-5 +i , 0, 2), vec3(0), vec3(0.001f)));
+		m_scene.m_instances.back()->m_baseCol = vec4((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f, 1);
+		m_scene.m_instances.back()->m_brightCol = vec4((rand() % 100) / 100.0f, (rand() % 100) / 100.0f, (rand() % 100) / 100.0f, 1);
 	}	
 	
-	
+	for (int i = 0; i < 10; ++i)
+	{
+		m_scene.m_instances.push_back(new Instance(&pyro, &m_shaders[1], vec3(-5 + i, 0, 0), vec3(0), vec3(0.001f)));
+	}
+
+	for (int i = 0; i < 10; ++i)
+	{
+		m_scene.m_instances.push_back(new Instance(&buns, &m_shaders[3], vec3(-5 + i, 0, -2), vec3(0), vec3(0.001f)));
+	}
 
 	m_orbitOn = true;
 
@@ -127,20 +117,11 @@ bool MyApplication::startup()
 
 	m_radialBlur = false;
 
-	//m_scene.m_instances.push_back(new Instance(&screenQuad, &m_shaders[2]));
-
-	//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
-	//pFrameBuffer->SetUp();
-
 	float width = (float)getWindowWidth();
 	float height = (float)getWindowHeight();
 
 	pFrameBuffer = new FrameBuffer(width, height);
 	pFrameBuffer->SetUp();
-
-	/*Model* quadModel = new Model();
-	quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
-	pFrameBuffer->SetQuad(quadModel);*/
 
 	Model* quadModel = new Model();
 	quadModel->makePostProcessQuad(width, height);
@@ -148,12 +129,6 @@ bool MyApplication::startup()
 
 	m_prevWidth = width;
 	m_prevHeight = height;
-
-	//for (int i = 0; i < 500; ++i)
-	//{
-	//	m_scene.m_instances.push_back(new Instance(&buns, &m_shaders[0], vec3(0.1f*i, 0, 0.1f*i), vec3(0.1f*i), vec3(0.5f)));
-
-	//}
 
 	return true;
 }
@@ -178,13 +153,6 @@ void MyApplication::update(float dt)
 	if (m_prevWidth != width || m_prevHeight != height)
 	{
 		pFrameBuffer->RecreateBuffer(width, height);
-		//delete pFrameBuffer->m_model;
-		//delete pFrameBuffer;
-		//pFrameBuffer = new FrameBuffer(getWindowWidth(), getWindowHeight());
-		//pFrameBuffer->SetUp();
-		//Model* quadModel = new Model();
-		//quadModel->makePostProcessQuad(getWindowWidth(), getWindowHeight());
-		//pFrameBuffer->SetQuad(quadModel);
 
 		m_prevWidth = width;
 		m_prevHeight = height;
@@ -208,17 +176,6 @@ void MyApplication::update(float dt)
 
 	// add a transform so that we can see the axis
 	Gizmos::addTransform(mat4(1));
-
-	//// demonstrate a few shapes
-	//Gizmos::addAABBFilled(vec3(0), vec3(1), vec4(0, 0.5f, 1, 0.25f));
-	//Gizmos::addSphere(vec3(5, 0, 5), 1, 8, 8, vec4(1, 0, 0, 0.5f));
-	//Gizmos::addRing(vec3(5, 0, -5), 1, 1.5f, 8, vec4(0, 1, 0, 1));
-	//Gizmos::addDisk(vec3(-5, 0, 5), 1, 16, vec4(1, 1, 0, 1));
-	//Gizmos::addArc(vec3(-5, 0, -5), 0, 2, 1, 8, vec4(1, 0, 1, 1));
-
-	//mat4 t = glm::rotate(m_time, glm::normalize(vec3(1, 1, 1)));
-	//t[3] = vec4(-2, 0, 0, 1);
-	//Gizmos::addCylinderFilled(vec3(0), 0.5f, 1, 5, vec4(0, 1, 1, 1), &t);
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -259,9 +216,6 @@ void MyApplication::draw()
 	ImGui::Begin("Lights");
 	ImGui::Checkbox("Auto Orbit Light", &m_orbitOn);
 	ImGui::SliderFloat3("Light Pos", (float*)&m_scene.m_lightDir, -10, 10);
-	ImGui::SliderFloat3("Point Light Pos", &m_scene.m_pointLights[0].x, -20, 20);
-	ImGui::SliderFloat3("Point Light Color", &m_scene.m_pointLightColours[0].x, 0, 1);
-	ImGui::SliderFloat("Point Light Power", &m_scene.m_pointLightPowers[0], 0, 100);
 	ImGui::End();
 
 	ImGui::Begin("Post-Processing");

@@ -34,6 +34,8 @@ public:
 
 	void SetUniform(const glm::vec3& uniform, Uniform uniformName);
 
+	void SetUniform(const glm::vec4& uniform, const char*uniformName);
+
 	void SetUniform(const float& uniform, Uniform uniformName);
 
 	void SetUniform(const float& uniform, const char* uniformName);

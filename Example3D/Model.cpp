@@ -16,6 +16,8 @@ Model::~Model()
 
 bool Model::Load(const char * filename)
 {
+	isFBX = false;
+	isEscher = false;
 	if (strstr(filename, ".obj") != NULL)
 	{
 		tinyobj::attrib_t attribs;
@@ -24,7 +26,6 @@ bool Model::Load(const char * filename)
 		std::string err;
 		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, filename);
 		createOpenGLBuffers(attribs, shapes);
-		isFBX = false;
 		return success;
 	}
 
@@ -42,6 +43,8 @@ bool Model::Load(const char * filename)
 
 bool Model::Load(const char * modelFile, const char * textureFile)
 {
+	isFBX = false;
+	isEscher = false;
 	if (strstr(modelFile, ".obj") != NULL)
 	{
 		tinyobj::attrib_t attribs;
@@ -51,7 +54,7 @@ bool Model::Load(const char * modelFile, const char * textureFile)
 
 		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
 
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 
 		createOpenGLBuffers(attribs, shapes);
 
@@ -62,10 +65,9 @@ bool Model::Load(const char * modelFile, const char * textureFile)
 	{
 		m_fbx = new FBXFile();
 		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
-
 
 		return true;
 	}
@@ -75,6 +77,8 @@ bool Model::Load(const char * modelFile, const char * textureFile)
 
 bool Model::Load(const char * modelFile, const char * textureFile, const char * normalMapFile)
 {
+	isFBX = false;
+	isEscher = false;
 	if (strstr(modelFile, ".obj") != NULL)
 	{
 		tinyobj::attrib_t attribs;
@@ -84,7 +88,7 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 
 		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
 
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 
 		createOpenGLBuffers(attribs, shapes);
 
@@ -95,7 +99,7 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 	{
 		m_fbx = new FBXFile();
 		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 		m_normalmap = Texture::LoadTexture(normalMapFile);
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
@@ -109,6 +113,8 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 
 bool Model::Load(const char * modelFile, const char * textureFile, const char * normalMapFile, const char * specularMapFile)
 {
+	isFBX = false;
+	isEscher = false;
 	if (strstr(modelFile, ".obj") != NULL)
 	{
 		tinyobj::attrib_t attribs;
@@ -118,7 +124,7 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 
 		bool success = tinyobj::LoadObj(&attribs, &shapes, &materials, &err, modelFile);
 
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 
 		createOpenGLBuffers(attribs, shapes);
 
@@ -129,17 +135,22 @@ bool Model::Load(const char * modelFile, const char * textureFile, const char * 
 	{
 		m_fbx = new FBXFile();
 		m_fbx->load(modelFile, FBXFile::UNIT_SCALE::UNITS_METER, true, true, true);
-		m_texture = Texture::LoadTexture(textureFile);
+		m_texture.push_back(Texture::LoadTexture(textureFile));
 		m_normalmap = Texture::LoadTexture(normalMapFile);
 		m_specularmap = Texture::LoadTexture(specularMapFile);
 		createOpenGLBuffers(m_fbx);
 		isFBX = true;
 
-
 		return true;
 	}
 
 	return false;
+}
+
+bool Model::Load(unsigned int texture)
+{
+	m_texture.push_back(texture);
+	return true;
 }
 
 void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader)
@@ -149,13 +160,14 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader)
 	shader->SetUniform(mvp, Uniform::MVP);
 
 	shader->SetUniform(transform, Uniform::MODELTRANSFORM);
+	
 
 	unsigned int programID = shader->GetID();
 
-	if (m_texture != NULL)
+	if (m_texture.size() == 1)
 	{	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_texture);
+		glActiveTexture(GL_TEXTURE0); 
+		glBindTexture(GL_TEXTURE_2D, m_texture[0]);
 
 		unsigned int textureUniform = glGetUniformLocation(programID, "tex");
 		glUniform1i(textureUniform, 0);
@@ -175,6 +187,35 @@ void Model::Draw(glm::mat4 transform, glm::mat4 cameraMatrix, Shader* shader)
 		glBindTexture(GL_TEXTURE_2D, m_specularmap);
 		unsigned int specularUniform = glGetUniformLocation(programID, "specular");
 		glUniform1i(specularUniform, 2);
+	}
+
+	if (m_texture.size() == 4)
+	{
+		unsigned int loc;
+
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_texture[0]);
+
+		loc = glGetUniformLocation(programID, "scribble1");
+		glUniform1i(loc, 3);
+
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, m_texture[1]);
+
+		loc = glGetUniformLocation(programID, "scribble2");
+		glUniform1i(loc, 4);
+
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, m_texture[2]);
+
+		loc = glGetUniformLocation(programID, "scribble3");
+		glUniform1i(loc, 5);
+
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, m_texture[3]);
+
+		loc = glGetUniformLocation(programID, "scribble4");
+		glUniform1i(loc, 6);
 	}
 
 	if (!isFBX)

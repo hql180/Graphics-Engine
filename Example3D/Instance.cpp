@@ -37,16 +37,6 @@ void Instance::updateTransform()
 void Instance::draw(Scene * scene)
 {
 	glm::mat4 mvp = scene->getCameraMatrix() * m_transform;
-	//glm::vec3 screenPos(mvp[3][0] / mvp[3][3], mvp[3][1] / mvp[3][3], mvp[3][2]);
-
-
-	//float edge = 0.75f;
-	//if (screenPos.x < -edge || screenPos.x > edge ||
-	//	screenPos.y < -edge || screenPos.y > edge)
-	//{
-	//	scene->culled++;
-	//	return;
-	//}
 
 	glm::vec4 corner;
 	glm::vec4 screenPos[8];
@@ -85,6 +75,12 @@ void Instance::draw(Scene * scene)
 	{
 		glm::vec3 center = glm::vec3((m_model->boundsMin + m_model->boundsMax)*0.5f);
 		aie::Gizmos::addAABB(center, (m_model->boundsMax - m_model->boundsMin)*0.5f, glm::vec4(1), &m_transform);
+	}
+
+	if (m_model->isEscher)
+	{
+		m_shader->SetUniform(m_baseCol, "baseCol");
+		m_shader->SetUniform(m_brightCol, "brightCol");
 	}
 
 	m_model->Draw(m_transform, scene->getCameraMatrix(), m_shader);

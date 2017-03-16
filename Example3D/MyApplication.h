@@ -47,6 +47,8 @@ private:
 
 	Model pyro;
 
+	Model escherPyro;
+
 	Model buns;
 
 	Scene m_scene;
@@ -70,5 +72,7 @@ private:
 	Model screenQuad;
 
 	float m_prevHeight, m_prevWidth;
+
+	static int m_scribbleTextures[];
 };
 
