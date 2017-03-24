@@ -31,25 +31,6 @@ float hash( vec2 p )
 	return fract(sin(dot(p, vec2(41, 289)))*45758.5453); 
 }
 
-vec3 lOff()
-{    
-    
-    vec2 u = sin(vec2(1.57, 0) - iGlobalTime/2);
-	u = normalize((inverse(MVP) * vec4(lightDirection,1))).xy;
-	//vec3 light = normalize(lightDirection);
-	//u = light.xz;
-    mat2 a = mat2(u, -u.y, u.x);
-    //a = mat2 (light, light.z);
-
-    vec3 l = normalize(vec3(1.5, 1., -0.5));
-	normalize((inverse(MVP) * vec4(lightDirection,1))).xyz;
-    l.xz = a * l.xz;
-    l.xy = a * l.xy;
-    
-    return l;    
-}
-
-
 vec4 simple()
 {
 	return texture(target, tempCoord);
@@ -64,7 +45,6 @@ vec4 sharpen()
 	tempColour += texture(target, tempCoord - vec2(0, texel.y)) * (-2/3);
 	tempColour += texture(target, tempCoord + vec2(texel.x, 0)) * (-2/3);
 	tempColour += texture(target, tempCoord - vec2(texel.x, 0)) * (-2/3);
-	tempColour.a = 1.0f;
 
 	tempColour = tempColour / 3;
 
@@ -175,10 +155,7 @@ vec4 radialBlur()
     // Sample weight. Decays as we radiate outwards.
     float weight = 0.05; 
 
-	// Light offset. Kind of fake. See above.
-    vec3 l = normalize(lOff());
-
-	l = (MVP * vec4(lightDirection, 0)).xyz;  
+    vec3 l = (MVP * vec4(lightDirection, 0)).xyz;  
 
     // Offset texture position (uv - .5), offset again by the fake light movement.
     // It's used to set the blur direction (a direction vector of sorts), and is used 
@@ -195,9 +172,7 @@ vec4 radialBlur()
     
     // Grabbing a portion of the initial texture sample. Higher numbers will make the
     // scene a little clearer, but I'm going for a bit of abstraction.
-    vec4 col = texture(target, uv.xy) * .25;
-    
-	col = tempColour *.35;
+    vec4 col = tempColour *.35;
 
     // Jittering, to get rid of banding. Vitally important when accumulating discontinuous 
     // samples, especially when only a few layers are being used.
@@ -206,12 +181,12 @@ vec4 radialBlur()
     // The radial blur loop. Take a texture sample, move a little in the direction of
     // the radial direction vector (dTuv) then take another, slightly less weighted,
     // sample, add it to the total, then repeat the process until done.
-    for(float i=0.; i < samples; i++){
+    for(float i=0.; i < samples; i++)
+	{
     
         uv -= dTuv;
         col += texture(target, uv) * weight;
-        weight *= decay;
-        
+        weight *= decay;        
     }
     
     // Multiplying the final color with a spotlight centered on the focal point of the radial
